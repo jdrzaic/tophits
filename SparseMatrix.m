@@ -17,7 +17,7 @@ classdef SparseMatrix < handle
             obj.m = m;
             % generated data - needs indexing overloading
             obj.mat = cell(m, 1);
-            obj.mat{1} = [2 5 5 2];
+            obj.mat{1} = [1 1 2 5 5 2];
         end
         
         function addCoordinateForWord(obj, wordInd, i, j)
@@ -79,11 +79,18 @@ classdef SparseMatrix < handle
             sliceIndex = ceil(index / (obj.k * obj.l));
             % index in the current slice
             indexInSlice = index - prevSliceIndex * (obj.k * obj.l);
+            % row in current slice
+            row = ceil(indexInSlice / obj.l);
+            % column in current slice
+            col = mod(indexInSlice, obj.l);
+            if col == 0
+                col = obj.l;
+            end
 
             % number of (i,j) pairs in a slice
             sizeAnchor = size(obj.mat{sliceIndex}, 2) / 2;
             for i = 1:sizeAnchor
-                if obj.mat{sliceIndex}(2 * i - 1) == 1 && obj.mat{sliceIndex}(2 + i + 1) == 1
+                if obj.mat{sliceIndex}(2 * i - 1) == row && obj.mat{sliceIndex}(2 * i) == col
                     indexelement = 1;
                     return
                 end
