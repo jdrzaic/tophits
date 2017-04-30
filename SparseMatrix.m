@@ -1,4 +1,4 @@
-classdef SparseMatrix
+classdef SparseMatrix < handle
     % Sparse matrix format
     
     properties
@@ -16,9 +16,9 @@ classdef SparseMatrix
         end
         
         function addCoordinateForWord(obj, wordInd, i, j)
-            currSize = length(obj.mat{wordInd})
-            obj.mat{wordInd}(currSize + 1) = i
-            obj.mat{wordInd}(currSize + 2) = j
+            currSize = length(obj.mat{wordInd});
+            obj.mat{wordInd}(currSize + 1) = i;
+            obj.mat{wordInd}(currSize + 2) = j;
         end
         
         %function varargout = subsref(obj, S)
