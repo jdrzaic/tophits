@@ -99,8 +99,36 @@ classdef SparseMatrix < handle
             end
         end
         
-        function indexelements = getElementsBy3Indexes(obj, row, col, anc)
-        
+        function indexelements = getElementsBy3Indexes(obj, rows, cols, ancs)
+            if rows == ':'
+                rows = 1:obj.k;
+            end
+            if cols == ':'
+                cols = 1:obj.l;
+            end
+            if ancs == ':'
+                ancs = 1:obj.m;
+            end
+            indexelements = zeros(length(rows), length(cols), length(ancs));
+            % index in the fetched tensor
+            sliceOffset = ancs(1); % offset for slices
+            for slice = ancs
+                slicePoints = obj.mat{slice};
+                sizeSlice = size(slicePoints, 2) / 2;
+                for row = rows
+                    for col = cols
+                        for i = 1:sizeSlice
+                            foundRow = slicePoints(2 * i - 1);
+                            foundCol = slicePoints(2 * i);
+                            [foundRowValidation, foundRowInd] = ismember(foundRow, rows);
+                            [foundColValidation, foundColInd] = ismember(foundCol, cols);
+                            if foundRowValidation && foundColValidation
+                                indexelements(foundRowInd, foundColInd, slice - sliceOffset + 1) = 1;
+                            end
+                        end
+                    end
+                end
+            end
         end
         
         function indexelements = getElementsByIndex(obj, indexCell)
