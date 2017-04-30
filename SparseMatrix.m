@@ -57,17 +57,35 @@ classdef SparseMatrix < handle
             end
             switch length(S.subs)
                 case 1
-                    outargs = obj.getElementsByIndex(S.subs(1));
+                    outargs = obj.getElementsByIndex(S.subs);
                 case 2
-                    outargs = obj.getElementsBy2Indexes(S.subs);
+                    outargs = obj.getElementsBy2Indexes(S.subs{1}, S.subs{2});
                 case 3
-                    outargs = obj.getElementsBy3Indexes(S.subs);
+                    outargs = obj.getElementsBy3Indexes(S.subs{1}, S.subs{2}, S.subs{3});
                 otherwise
                     error('Not a valid indexing exception.');
             end
         end
         
         function obj = subsasgn(obj, S, varargin)
+        
+        end
+        
+        function indexelements = getElementsBy2Indexes(obj, rows, cols)
+            %if row > obj.k || row < 1 || col > obj.l * obj.m || col < 1
+            %    error('Index not in valid range.');
+            %end
+            
+            if rows == ':'
+                rows = 1:obj.k;
+            end
+            if cols == ':'
+                cols = 1:(obj.l * obj.m);
+            end
+            indexelements = 1;
+        end
+        
+        function indexelements = getElementsBy3Indexes(obj, row, col, anc)
         
         end
         
