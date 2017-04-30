@@ -17,7 +17,7 @@ classdef SparseMatrix < handle
             obj.m = m;
             % generated data - needs indexing overloading
             obj.mat = cell(m, 1);
-            obj.mat{1} = [1 1 2 2 3 3];
+            obj.mat{1} = [1 1 2 2 2 3 3 3];
             obj.mat{2} = [2 2];
         end
         
@@ -37,7 +37,7 @@ classdef SparseMatrix < handle
         end
         
         function outargs = subsref(obj, S)
-            msgID = 'MYFUN:BadIndex';
+            msgID = 'subsref:BadIndex';
             err = 0;
             if length(S) ~= 1
                 msg = 'Indexing invalid.';
