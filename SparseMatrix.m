@@ -37,24 +37,7 @@ classdef SparseMatrix < handle
         end
         
         function outargs = subsref(obj, S)
-            msgID = 'subsref:BadIndex';
-            err = 0;
-            if length(S) ~= 1
-                msg = 'Indexing invalid.';
-                err = 1;
-            end
-            if strcmp(S(1).type, '{}')
-                msg = 'Cell contents reference from a non-cell araray object.';
-                err = 1;
-            end
-            if strcmp(S(1).type, '.')
-                msg = 'Struct contents reference from a non-struct array object.';
-                err = 1;
-            end
-            if err
-                baseException = MException(msgID,msg);
-                throw(baseException)
-            end
+            obj.handleError(S);
             switch length(S.subs)
                 case 1
                     outargs = obj.getElementsByIndex(S.subs);
@@ -68,7 +51,17 @@ classdef SparseMatrix < handle
         end
         
         function obj = subsasgn(obj, S, varargin)
-            varargin
+            handleError(S)
+            switch length(S.subs)
+                case 1
+                    obj.setElementsByIndex(S.subs);
+                case 2
+                    obj.setElementsBy2Indexes(S.subs{1}, S.subs{2});
+                case 3
+                    obj.setElementsBy3Indexes(S.subs{1}, S.subs{2}, S.subs{3});
+                otherwise
+                    error('Not a valid indexing exception.');
+            end
         end
         
         function indexelements = getElementsBy2Indexes(obj, rows, cols)
@@ -174,7 +167,36 @@ classdef SparseMatrix < handle
             end
             indexelement = 0;
         end
+        
+        function handleError(~, S)
+            msgID = 'subsref:BadIndex';
+            err = 0;
+            if length(S) ~= 1
+                msg = 'Indexing invalid.';
+                err = 1;
+            end
+            if strcmp(S(1).type, '{}')
+                msg = 'Cell contents reference from a non-cell araray object.';
+                err = 1;
+            end
+            if strcmp(S(1).type, '.')
+                msg = 'Struct contents reference from a non-struct array object.';
+                err = 1;
+            end
+            if err
+                baseException = MException(msgID,msg);
+                throw(baseException)
+            end
+        end
+        
+        function setElementsByIndex(obj, indexCell)
+        end
 
-    end 
+        function setElementsBy2Indexes(obj, rows, cols)
+        end
+        
+        function setElementsBy3Indexes(obj, rows, cols, ancs)
+        end
+    end  
 end
 
