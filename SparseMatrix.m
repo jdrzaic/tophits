@@ -1,5 +1,5 @@
 classdef SparseMatrix < handle
-    % Sparse matrix format
+    % Sparse 3-dimensional tensor format
     properties
         k
         l
