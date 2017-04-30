@@ -17,7 +17,7 @@ classdef SparseMatrix < handle
             obj.m = m;
             % generated data - needs indexing overloading
             obj.mat = cell(m, 1);
-            obj.mat{1} = [1 1 2 2 2 3 3 3];
+            obj.mat{1} = [1 1 1 2];
             obj.mat{2} = [2 2];
         end
         
@@ -68,7 +68,7 @@ classdef SparseMatrix < handle
         end
         
         function obj = subsasgn(obj, S, varargin)
-        
+            varargin
         end
         
         function indexelements = getElementsBy2Indexes(obj, rows, cols)
@@ -154,12 +154,12 @@ classdef SparseMatrix < handle
             % index in the current slice
             indexInSlice = index - prevSliceIndex * (obj.k * obj.l);
             % row in current slice
-            row = ceil(indexInSlice / obj.l);
+            row = mod(indexInSlice, obj.k);
             if row == 0
                 row = obj.k;
             end
             % column in current slice
-            col = mod(indexInSlice, obj.l);
+            col = ceil(indexInSlice / obj.k);
             if col == 0
                 col = obj.l;
             end
