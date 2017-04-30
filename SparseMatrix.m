@@ -21,21 +21,6 @@ classdef SparseMatrix < handle
             obj.mat{2} = [2 2];
         end
         
-        function addCoordinateForWord(obj, wordInd, i, j)
-            if wordInd < 1 || wordInd > obj.m
-                error('Third argument not valid.')
-            end
-            if i < 1 || i > obj.k
-                error('First argument not valid.')
-            end
-            if j < 1 || j > obj.l
-                error('Second argument not valid.')
-            end
-            currSize = length(obj.mat{wordInd});
-            obj.mat{wordInd}(currSize + 1) = i;
-            obj.mat{wordInd}(currSize + 2) = j;
-        end
-        
         function outargs = subsref(obj, S)
             obj.handleError(S);
             switch length(S.subs)
@@ -51,10 +36,16 @@ classdef SparseMatrix < handle
         end
         
         function obj = subsasgn(obj, S, varargin)
-            handleError(S)
+            argin = varargin{1};
+            handleError(obj, S)
+            % values stored can only be 1 and 0 - maybe treat everything
+            % except 0 as 1?
+            if any(ceil(argin) ~= floor(argin)) || any(argin < 0) || any(argin > 1)
+                error('Only 1 and 0 values allowed.')
+            end
             switch length(S.subs)
                 case 1
-                    obj.setElementsByIndex(S.subs);
+                    obj.setElementsByIndex(S.subs{1});
                 case 2
                     obj.setElementsBy2Indexes(S.subs{1}, S.subs{2});
                 case 3
@@ -189,7 +180,13 @@ classdef SparseMatrix < handle
             end
         end
         
-        function setElementsByIndex(obj, indexCell)
+        function setElementsByIndex(obj, indexes)
+            if indexes == ':'
+                indexes = 1:(obj.k * obj.l * obj.m);
+            end
+            for indexId = 1:length(indexes)
+                obj.setElementForIndex(indexes(indexId));
+            end
         end
 
         function setElementsBy2Indexes(obj, rows, cols)
@@ -197,6 +194,38 @@ classdef SparseMatrix < handle
         
         function setElementsBy3Indexes(obj, rows, cols, ancs)
         end
+        
+        function setElementForIndex(obj, index)
+            if index < 1
+                error('Index not in valid range.');
+            end
+            % slice for the index
+            prevSliceIndex = floor(index / (obj.k * obj.l));
+            sliceIndex = ceil(index / (obj.k * obj.l));
+            obj.extendMatIfNeeded(sliceIndex);
+            % index in the current slice
+            indexInSlice = index - prevSliceIndex * (obj.k * obj.l);
+            % row in current slice
+            row = mod(indexInSlice, obj.k);
+            if row == 0
+                row = obj.k;
+            end
+            % column in current slice
+            col = ceil(indexInSlice / obj.k);
+            if col == 0
+                col = obj.l;
+            end
+            currSliceLen = length(obj.mat{sliceIndex});
+            obj.mat{sliceIndex}(currSliceLen + 1) = row;
+            obj.mat{sliceIndex}(currSliceLen + 2) = col;
+        end
+
+        function extendMatIfNeeded(obj, sliceIndex)
+            if sliceIndex > obj.m
+                obj.m = sliceIndex;
+            end
+        end
+
     end  
 end
 
