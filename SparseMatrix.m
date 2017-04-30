@@ -72,17 +72,31 @@ classdef SparseMatrix < handle
         end
         
         function indexelements = getElementsBy2Indexes(obj, rows, cols)
-            %if row > obj.k || row < 1 || col > obj.l * obj.m || col < 1
-            %    error('Index not in valid range.');
-            %end
-            
             if rows == ':'
                 rows = 1:obj.k;
             end
             if cols == ':'
                 cols = 1:(obj.l * obj.m);
             end
-            indexelements = 1;
+            if any(cols > obj.m * obj.l) || any(rows > obj.k)
+                error('Not a valid indexing exception.');
+            end
+            % matrix to store elements
+            indexelements = zeros(length(rows), length(cols));
+            % iterating over slices
+            for slice = 1:obj.m
+                for elemInd = 1:size(obj.mat{slice}, 2) / 2
+                    % transform index to the ones required when unwrapping
+                    % tensor
+                    foundCol = (slice - 1) * obj.l + obj.mat{slice}(elemInd * 2);
+                    foundRow = obj.mat{slice}(elemInd * 2 - 1);
+                    [foundRowValidation, foundRowInd] = ismember(foundRow, rows);
+                    [foundColValidation, foundColInd] = ismember(foundCol, cols);
+                    if foundRowValidation && foundColValidation 
+                        indexelements(foundRowInd, foundColInd) = 1;
+                    end
+                end
+            end
         end
         
         function indexelements = getElementsBy3Indexes(obj, row, col, anc)
