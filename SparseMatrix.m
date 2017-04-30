@@ -17,7 +17,8 @@ classdef SparseMatrix < handle
             obj.m = m;
             % generated data - needs indexing overloading
             obj.mat = cell(m, 1);
-            obj.mat{1} = [1 1 2 5 5 2];
+            obj.mat{1} = [1 1 2 2 3 3];
+            obj.mat{2} = [2 2];
         end
         
         function addCoordinateForWord(obj, wordInd, i, j)
@@ -54,12 +55,13 @@ classdef SparseMatrix < handle
                 baseException = MException(msgID,msg);
                 throw(baseException)
             end
-            S.subs
             switch length(S.subs)
                 case 1
-                    outargs = obj.getElementByIndex(S.subs(1));
+                    outargs = obj.getElementsByIndex(S.subs(1));
                 case 2
+                    outargs = obj.getElementsBy2Indexes(S.subs);
                 case 3
+                    outargs = obj.getElementsBy3Indexes(S.subs);
                 otherwise
                     error('Not a valid indexing exception.');
             end
@@ -69,10 +71,22 @@ classdef SparseMatrix < handle
         
         end
         
-        function indexelement = getElementByIndex(obj, indexCell)
-            index = indexCell{1};  % unwrap index
+        function indexelements = getElementsByIndex(obj, indexCell)
+            indexes = indexCell{1};  % unwrap index
+            if indexes == ':'
+                indexes = 1:(obj.k * obj.l * obj.m);
+            end
+            
+            indexelements = zeros(length(indexes), 1);
+            for indexId = 1:length(indexes)
+                indexelements(indexId) = obj.getElementForIndex(indexes(indexId));
+            end
+        end
+        
+        function indexelement = getElementForIndex(obj, index)
+            
             if index < 1 || index > obj.m * obj.k * obj.l
-                error('Index not in valid range.')
+                error('Index not in valid range.');
             end
             % slice for the index
             prevSliceIndex = floor(index / (obj.k * obj.l));
@@ -81,6 +95,9 @@ classdef SparseMatrix < handle
             indexInSlice = index - prevSliceIndex * (obj.k * obj.l);
             % row in current slice
             row = ceil(indexInSlice / obj.l);
+            if row == 0
+                row = obj.k;
+            end
             % column in current slice
             col = mod(indexInSlice, obj.l);
             if col == 0
