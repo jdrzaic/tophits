@@ -52,23 +52,38 @@ classdef SpTensor < handle
             if ancs == ':'
                 ancs = 1:obj.m;
             end
-            switch length(values)
-                case 1
-                    for slice = ancs
-                        sizeSlice = size(obj.mat{slice}, 2) / 3;
-                        for row = rows
-                            for col = cols
-                                sizeSlice = obj.setForRowAndCol(slice, sizeSlice, row, col, values);
-                            end
+            
+            if isa(values, 'double') && length(values) == 1
+                for slice = ancs
+                    obj.extendMatIfNeeded(slice);
+                    sizeSlice = size(obj.mat{slice}, 2) / 3;
+                    for row = rows
+                        for col = cols
+                            sizeSlice = obj.setForRowAndCol(slice, sizeSlice, row, col, values(1));
                         end
                     end
-                    obj.mat{1}
-                    obj.mat{2}
-                    obj.mat{3}
-                otherwise
-                    
+                end
+            elseif ismatrix(values)
+                if ~checkIfMatDimMatching(values, length(rows), length(columns), length(ancs))
+                    error('Matrix dimensions not matching')
+                end
+                
+            elseif isa(values, 'SpTensor')
+                % sparse tensor
             end
         end
+        
+        function matching = checkIfMatDimMatching(mat, rowsSize, colsSize, ancsSize)
+            if rowsSize == size(mat, 1) && colsSize == size(mat, 2) && ancsSize == 1
+                matching = 1;
+            elseif rowsSize == size(mat, 1) && colsSize == 1 && ancsSize == size(mat, 2)
+                matching = 1;
+            elseif rowsSize == 1 && colsSize == size(mat, 1) && ancsSize == size(mat, 2)
+                matching = 1;
+            else
+                matching = 0;
+            end
+        end 
         
         function sizeSlice = setForRowAndCol(obj, slice, sizeSlice, row, col, value)
             foundCoordinate = 0;
@@ -89,6 +104,7 @@ classdef SpTensor < handle
         function extendMatIfNeeded(obj, sliceIndex)
             if sliceIndex > obj.m
                 obj.m = sliceIndex;
+                obj.mat{sliceIndex} = [];
             end
         end
         
