@@ -63,9 +63,9 @@ classdef SpTensor < handle
                         end
                     end
                 end
-            elseif ismatrix(values)
+            elseif isnumeric(values)
                 if ~obj.checkIfMatDimMatching(values, length(rows), length(cols), length(ancs))
-                    error('Matrix dimensions not matching')
+                    error('Matrix dimensions not matching.')
                 end
                 % offset in matching dimensions
                 offsetRow = rows(1) - 1;
@@ -79,7 +79,22 @@ classdef SpTensor < handle
                     end
                 end
             elseif isa(values, 'SpTensor')
-                
+                if length(rows) ~= TensorOperations.size(values, 1) || length(cols) ~= TensorOperations.size(values, 2) || length(ancs) ~= TensorOperations.size(values, 3)
+                    error('Tensor dimensions not matching.')
+                end
+                offsetRow = rows(1) - 1;
+                offsetCol = cols(1) - 1;
+                offsetAnc = ancs(1) - 1;
+                for slice = ancs
+                    sizeSlice = size(obj.mat{slice}, 2) / 3; % size of slice in obj
+                    valueSizeSlice = size(values.mat{slice - offsetAnc}, 2) / 3; % size of slice in subtensor
+                    for i = 1:valueSizeSlice
+                        row = values.mat{slice - offsetAnc}(3 * i - 2);
+                        col = values.mat{slice - offsetAnc}(3 * i - 1);
+                        value = values.mat{slice - offsetAnc}(3 * i);
+                        obj.setForRowAndCol(slice, sizeSlice, row + offsetRow, col + offsetCol, value)
+                    end
+                end
             end
             for slice = 1:obj.m
                 obj.mat{slice}
@@ -181,5 +196,6 @@ classdef SpTensor < handle
                     error('Not a valid indexing exception.');
             end
         end
+        
     end
 end
