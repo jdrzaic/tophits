@@ -64,16 +64,29 @@ classdef SpTensor < handle
                     end
                 end
             elseif ismatrix(values)
-                if ~checkIfMatDimMatching(values, length(rows), length(columns), length(ancs))
+                if ~obj.checkIfMatDimMatching(values, length(rows), length(cols), length(ancs))
                     error('Matrix dimensions not matching')
                 end
-                
+                % offset in matching dimensions
+                offsetRow = rows(1) - 1;
+                offsetCol = cols(1) - 1;
+                for slice = ancs
+                    sizeSlice = size(obj.mat{slice}, 2) / 3;
+                    for row = rows
+                        for col = cols
+                            obj.setForRowAndCol(slice, sizeSlice, row, col, values(row - offsetRow, col - offsetCol))
+                        end
+                    end
+                end
             elseif isa(values, 'SpTensor')
-                % sparse tensor
+                
+            end
+            for slice = 1:obj.m
+                obj.mat{slice}
             end
         end
         
-        function matching = checkIfMatDimMatching(mat, rowsSize, colsSize, ancsSize)
+        function matching = checkIfMatDimMatching(~, mat, rowsSize, colsSize, ancsSize)
             if rowsSize == size(mat, 1) && colsSize == size(mat, 2) && ancsSize == 1
                 matching = 1;
             elseif rowsSize == size(mat, 1) && colsSize == 1 && ancsSize == size(mat, 2)
@@ -84,7 +97,7 @@ classdef SpTensor < handle
                 matching = 0;
             end
         end 
-        
+       
         function sizeSlice = setForRowAndCol(obj, slice, sizeSlice, row, col, value)
             foundCoordinate = 0;
             for i = 1:sizeSlice
@@ -119,13 +132,53 @@ classdef SpTensor < handle
                 msg = 'Cell contents reference from a non-cell araray object.';
                 err = 1;
             end
-            if strcmp(S(1).type, '.')
-                msg = 'Struct contents reference from a non-struct array object.';
-                err = 1;
-            end
+            
             if err
                 baseException = MException(msgID,msg);
                 throw(baseException)
+            end
+        end
+        
+        function indexelements = getElementsBy3Indexes(obj, rows, cols, ancs)
+            if rows == ':'
+                rows = 1:obj.k;
+            end
+            if cols == ':'
+                cols = 1:obj.l;
+            end
+            if ancs == ':'
+                ancs = 1:obj.m;
+            end
+            indexelements = zeros(length(rows), length(cols), length(ancs));
+            % index in the fetched tensor
+            sliceOffset = ancs(1); % offset for slices
+            for slice = ancs
+                slicePoints = obj.mat{slice};
+                sizeSlice = size(slicePoints, 2) / 3;
+                for i = 1:sizeSlice
+                    foundRow = slicePoints(3 * i - 2);
+                    foundCol = slicePoints(3 * i - 1);
+                    [foundRowValidation, foundRowInd] = ismember(foundRow, rows);
+                    [foundColValidation, foundColInd] = ismember(foundCol, cols);
+                    if foundRowValidation && foundColValidation
+                        indexelements(foundRowInd, foundColInd, slice - sliceOffset + 1) = 1;
+                    end
+                end
+            end
+        end
+        
+        function outargs = subsref(obj, S)
+            obj.handleError(S);
+            if strcmp(S(1).type, '.')
+                outargs = builtin('subsref', obj, S);
+                return
+            end
+            
+            switch length(S.subs)
+                case 3
+                    outargs = obj.getElementsBy3Indexes(S.subs{1}, S.subs{2}, S.subs{3});
+                otherwise
+                    error('Not a valid indexing exception.');
             end
         end
     end
