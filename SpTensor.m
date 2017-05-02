@@ -222,6 +222,9 @@ classdef SpTensor < handle
                 for slice = ancs
                     sizeSlice = size(obj.mat{slice}, 2) / 3;
                     for i = 1:sizeSlice
+                        if ~ismember(obj.mat{slice}(3 * i - 2), rows) || ~ismember(obj.mat{slice}(3 * i - 1), cols)
+                            continue
+                        end
                         if length(rows) == 1
                             rowsIndexes(length(rowsIndexes) + 1) = obj.mat{slice}(3 * i - 1) - offsetCol;
                             colsIndexes(length(colsIndexes) + 1) = slice - offsetAnc;
