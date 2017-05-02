@@ -89,7 +89,7 @@ classdef SpTensor < handle
                             elseif length(cols) == 1
                                 value = values(row - offsetRow, slice - offsetSlice);
                             else
-                                value = values(cols - offsetCol, slice - offsetSlice);
+                                value = values(col - offsetCol, slice - offsetSlice);
                             end
                             obj.setForRowAndCol(slice, sizeSlice, row, col, value);
                         end

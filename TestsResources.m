@@ -1,6 +1,6 @@
 classdef TestsResources
     methods(Static)
-        function [spten, spmat, normten, normmat] = initializeMulti1(m, mode)
+        function [spten, spmat, normten, normmat] = initializeMulti1(m)
             spmat = sparse(m, m);
             normmat = zeros(m, m);
 
