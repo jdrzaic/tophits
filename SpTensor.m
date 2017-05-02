@@ -78,12 +78,20 @@ classdef SpTensor < handle
                 % offset in matching dimensions
                 offsetRow = rows(1) - 1;
                 offsetCol = cols(1) - 1;
+                offsetSlice = ancs(1) - 1;
                 for slice = ancs
                     obj.extendMatIfNeeded(slice);
                     sizeSlice = size(obj.mat{slice}, 2) / 3;
                     for row = rows
                         for col = cols
-                            obj.setForRowAndCol(slice, sizeSlice, row, col, values(row - offsetRow, col - offsetCol));
+                            if length(ancs) == 1
+                                value = values(row - offsetRow, col - offsetCol);
+                            elseif length(cols) == 1
+                                value = values(row - offsetRow, slice - offsetSlice);
+                            else
+                                value = values(cols - offsetCol, slice - offsetSlice);
+                            end
+                            obj.setForRowAndCol(slice, sizeSlice, row, col, value);
                         end
                     end
                 end

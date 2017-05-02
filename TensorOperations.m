@@ -12,9 +12,12 @@ classdef TensorOperations < handle
                     size = t.l;
                 case 3
                     size = t.m;
+                case 0
+                    size = [t.k, t.l, t.m];
                 otherwise
                     error('Index out of range.')
             end
         end
+        
     end
 end

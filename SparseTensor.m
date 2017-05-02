@@ -16,9 +16,10 @@ classdef SparseTensor < handle
             obj.l = l;
             obj.m = m;
             % generated data - needs indexing overloading
+            % obj.mat{ind} = [i1 j1 v1 i2 j2 vj]
             obj.mat = cell(m, 1);
-            obj.mat{1} = [1 1 1 2];
-            obj.mat{2} = [2 2];
+            obj.mat{1} = [1 1 1 1 2 2];
+            obj.mat{2} = [2 2 2];
         end
         
         function outargs = subsref(obj, S)
@@ -57,18 +58,14 @@ classdef SparseTensor < handle
             sliceOffset = ancs(1); % offset for slices
             for slice = ancs
                 slicePoints = obj.mat{slice};
-                sizeSlice = size(slicePoints, 2) / 2;
-                for row = rows
-                    for col = cols
-                        for i = 1:sizeSlice
-                            foundRow = slicePoints(2 * i - 1);
-                            foundCol = slicePoints(2 * i);
-                            [foundRowValidation, foundRowInd] = ismember(foundRow, rows);
-                            [foundColValidation, foundColInd] = ismember(foundCol, cols);
-                            if foundRowValidation && foundColValidation
-                                indexelements(foundRowInd, foundColInd, slice - sliceOffset + 1) = 1;
-                            end
-                        end
+                sizeSlice = size(slicePoints, 2) / 3;
+                for i = 1:sizeSlice
+                    foundRow = slicePoints(3 * i - 2);
+                    foundCol = slicePoints(3 * i - 1);
+                    [foundRowValidation, foundRowInd] = ismember(foundRow, rows);
+                    [foundColValidation, foundColInd] = ismember(foundCol, cols);
+                    if foundRowValidation && foundColValidation
+                        indexelements(foundRowInd, foundColInd, slice - sliceOffset + 1) = 1;
                     end
                 end
             end
@@ -94,16 +91,7 @@ classdef SparseTensor < handle
                 throw(baseException)
             end
         end
-        
-        function setElementsByIndex(obj, indexes)
-            if indexes == ':'
-                indexes = 1:(obj.k * obj.l * obj.m);
-            end
-            for indexId = 1:length(indexes)
-                obj.setElementForIndex(indexes(indexId));
-            end
-        end
-        
+                
         function setElementsBy3Indexes(obj, rows, cols, ancs, argin)
         end
 
