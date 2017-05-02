@@ -143,9 +143,6 @@ classdef SpTensor < handle
             end
             if ~foundCoordinate
                 sizeSlice = sizeSlice + 1;
-                if ~isscalar(value)
-                    value = value(1);
-                end
                 obj.mat{slice}(sizeSlice * 3 - 2:sizeSlice * 3) = [row, col, value];
             end
         end
