@@ -52,6 +52,13 @@ classdef SpTensor < handle
             if ancs == ':'
                 ancs = 1:obj.m;
             end
+            % set matrix size (slices are covered separately)
+            if rows(length(rows)) > obj.k
+                obj.k = rows(length(rows));
+            end
+            if cols(length(cols)) > obj.l
+                obj.l = cols(length(cols));
+            end
             
             if isa(values, 'double') && length(values) == 1
                 for slice = ancs
@@ -71,6 +78,7 @@ classdef SpTensor < handle
                 offsetRow = rows(1) - 1;
                 offsetCol = cols(1) - 1;
                 for slice = ancs
+                    obj.extendMatIfNeeded(slice);
                     sizeSlice = size(obj.mat{slice}, 2) / 3;
                     for row = rows
                         for col = cols
@@ -86,6 +94,7 @@ classdef SpTensor < handle
                 offsetCol = cols(1) - 1;
                 offsetAnc = ancs(1) - 1;
                 for slice = ancs
+                    obj.extendMatIfNeeded(slice);
                     sizeSlice = size(obj.mat{slice}, 2) / 3; % size of slice in obj
                     valueSizeSlice = size(values.mat{slice - offsetAnc}, 2) / 3; % size of slice in subtensor
                     for i = 1:valueSizeSlice
@@ -154,7 +163,7 @@ classdef SpTensor < handle
             end
         end
         
-        function indexelements = getElementsBy3Indexes(obj, rows, cols, ancs)
+        function indexelements = getElementsByIndexes(obj, rows, cols, ancs)
             if rows == ':'
                 rows = 1:obj.k;
             end
@@ -164,7 +173,74 @@ classdef SpTensor < handle
             if ancs == ':'
                 ancs = 1:obj.m;
             end
-            indexelements = zeros(length(rows), length(cols), length(ancs));
+            if rows(length(rows)) > obj.k || cols(length(cols)) > obj.l || ancs(length(ancs)) > obj.m
+                error('Unvalid index access');
+            end
+            type = 'tensor';
+            if length(rows) == 1 || length(cols) == 1 || length(ancs) == 1
+                type = 'matrix';
+                if length(rows) == 1
+                    newRowsNum = length(cols);
+                    newColsNum = length(ancs);
+                elseif length(cols) == 1
+                    newRowsNum = length(rows);
+                    newColsNum = length(ancs);
+                else
+                    newRowsNum = length(rows);
+                    newColsNum = length(cols);
+                end
+            end
+            offsetRow = rows(1) - 1;
+            offsetCol = cols(1) - 1;
+            offsetAnc = ancs(1) - 1;
+            if strcmp(type, 'tensor')
+                coords = [];
+                values = [];
+                offsetRow = rows(1) - 1;
+                offsetCol = cols(1) - 1;
+                offsetAnc = ancs(1) - 1;
+                if rows(length(rows)) > obj.k || cols(length(cols)) > obj.l || ancs(length(ancs)) > obj.m
+                    error('Unvalid index access');
+                end
+                for slice = ancs
+                    sizeSlice = size(obj.mat{slice}, 2) / 3;
+                    for i = 1:sizeSlice
+                        foundRow = obj.mat{slice}(3 * i - 2);
+                        foundCol = obj.mat{slice}(3 * i - 1);
+                        if ismember(foundRow, rows) && ismember(foundCol, cols)
+                            values(length(values) + 1) = obj.mat{slice}(3 * i);
+                            coords(size(coords, 1) + 1, :) = [foundRow - offsetRow, foundCol - offsetCol, slice - offsetAnc];
+                        end
+                    end
+                end
+                % return sparse tensor
+                indexelements = SpTensor(length(rows), length(cols), length(ancs), coords, values);
+            else
+                % return built-in sparse matrix
+                % values to create sparse matrix
+                rowsIndexes = [];
+                colsIndexes = [];
+                values = [];
+                for slice = ancs
+                    sizeSlice = size(obj.mat{slice}, 2) / 3;
+                    for i = 1:sizeSlice
+                        if length(rows) == 1
+                            rowsIndexes(length(rowsIndexes) + 1) = obj.mat{slice}(3 * i - 1) - offsetCol;
+                            colsIndexes(length(colsIndexes) + 1) = slice - offsetAnc;
+                        elseif length(cols) == 1
+                            rowsIndexes(length(rowsIndexes) + 1) = obj.mat{slice}(3 * i - 2) - offsetRow;
+                            colsIndexes(length(colsIndexes) + 1) = slice - offsetAnc;
+                        else
+                            rowsIndexes(length(rowsIndexes) + 1) = obj.mat{slice}(3 * i - 2) - offsetRow;
+                            colsIndexes(length(colsIndexes) + 1) = obj.mat{slice}(3 * i - 1) - offsetCol;
+                        end
+                        values(length(values) + 1) = obj.mat{slice}(3 * i); 
+                    end
+                end
+                indexelements = sparse(rowsIndexes, colsIndexes, values, newRowsNum, newColsNum);
+            end
+           
+                
             % index in the fetched tensor
             sliceOffset = ancs(1); % offset for slices
             for slice = ancs
@@ -191,7 +267,7 @@ classdef SpTensor < handle
             
             switch length(S.subs)
                 case 3
-                    outargs = obj.getElementsBy3Indexes(S.subs{1}, S.subs{2}, S.subs{3});
+                    outargs = obj.getElementsByIndexes(S.subs{1}, S.subs{2}, S.subs{3});
                 otherwise
                     error('Not a valid indexing exception.');
             end
