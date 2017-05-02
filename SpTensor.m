@@ -9,17 +9,18 @@ classdef SpTensor < handle
     methods
         function obj = SpTensor(varargin)
             if length(varargin) < 3
-                error('At least 3 arguments must be provided.')
+                error('At least 3 arguments must be provided.');
             end
             obj.mat = cell(varargin{3}, 1);
-            if length(varargin) == 3
+            if length(varargin) == 3 || length(varargin) == 5
                 obj.k = varargin{1};
                 obj.l = varargin{2};
                 obj.m = varargin{3};
-            elseif length(varargin) == 5
-                obj.parseValues(varargin{4}, varargin{5})
+                if length(varargin) == 5
+                	obj.parseValues(varargin{4}, varargin{5});
+                end            
             else
-                error('Wrong number of arguments provided')
+                error('Wrong number of arguments provided');
             end
         end
         
@@ -33,7 +34,7 @@ classdef SpTensor < handle
         
         function obj = subsasgn(obj, S, varargin)
             argin = varargin{1};
-            handleError(obj, S)
+            handleError(obj, S);
             switch length(S.subs)
                 case 3
                     obj.setElementsByIndexes(S.subs{1}, S.subs{2}, S.subs{3}, argin);
@@ -82,13 +83,13 @@ classdef SpTensor < handle
                     sizeSlice = size(obj.mat{slice}, 2) / 3;
                     for row = rows
                         for col = cols
-                            obj.setForRowAndCol(slice, sizeSlice, row, col, values(row - offsetRow, col - offsetCol))
+                            obj.setForRowAndCol(slice, sizeSlice, row, col, values(row - offsetRow, col - offsetCol));
                         end
                     end
                 end
             elseif isa(values, 'SpTensor')
                 if length(rows) ~= TensorOperations.size(values, 1) || length(cols) ~= TensorOperations.size(values, 2) || length(ancs) ~= TensorOperations.size(values, 3)
-                    error('Tensor dimensions not matching.')
+                    error('Tensor dimensions not matching.');
                 end
                 offsetRow = rows(1) - 1;
                 offsetCol = cols(1) - 1;
@@ -101,12 +102,9 @@ classdef SpTensor < handle
                         row = values.mat{slice - offsetAnc}(3 * i - 2);
                         col = values.mat{slice - offsetAnc}(3 * i - 1);
                         value = values.mat{slice - offsetAnc}(3 * i);
-                        obj.setForRowAndCol(slice, sizeSlice, row + offsetRow, col + offsetCol, value)
+                        obj.setForRowAndCol(slice, sizeSlice, row + offsetRow, col + offsetCol, value);
                     end
                 end
-            end
-            for slice = 1:obj.m
-                obj.mat{slice}
             end
         end
         
@@ -238,23 +236,6 @@ classdef SpTensor < handle
                     end
                 end
                 indexelements = sparse(rowsIndexes, colsIndexes, values, newRowsNum, newColsNum);
-            end
-           
-                
-            % index in the fetched tensor
-            sliceOffset = ancs(1); % offset for slices
-            for slice = ancs
-                slicePoints = obj.mat{slice};
-                sizeSlice = size(slicePoints, 2) / 3;
-                for i = 1:sizeSlice
-                    foundRow = slicePoints(3 * i - 2);
-                    foundCol = slicePoints(3 * i - 1);
-                    [foundRowValidation, foundRowInd] = ismember(foundRow, rows);
-                    [foundColValidation, foundColInd] = ismember(foundCol, cols);
-                    if foundRowValidation && foundColValidation
-                        indexelements(foundRowInd, foundColInd, slice - sliceOffset + 1) = 1;
-                    end
-                end
             end
         end
         
