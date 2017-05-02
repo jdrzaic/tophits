@@ -121,6 +121,9 @@ classdef SpTensor < handle
         end 
        
         function sizeSlice = setForRowAndCol(obj, slice, sizeSlice, row, col, value)
+            if abs(value) < 10e-10
+                return
+            end
             foundCoordinate = 0;
             for i = 1:sizeSlice
                 foundRow = obj.mat{slice}(3 * i - 2);
