@@ -1,19 +1,20 @@
 function[B]=unfold(A,mode)
 
+dim=size(A);
 if mode==1
-    B=sparse(TensorOperations.size(A, 1),TensorOperations.size(A, 2)*TensorOperations.size(A, 3));
-    for j=1:TensorOperations.size(A, 2)
-        B(:,(TensorOperations.size(A, 3)*(j-1)+1):(TensorOperations.size(A, 3)*j))=A(:,j,:);
+    B=zeros(dim(1),dim(2)*dim(3));
+    for j=1:dim(2)
+        B(:,(dim(3)*(j-1)+1):(dim(3)*j))=squeeze(A(:,j,:));
     end
 elseif mode==2
-    B=sparse(TensorOperations.size(A, 2),TensorOperations.size(A, 1)*TensorOperations.size(A, 3));
-    for j=1:TensorOperations.size(A, 3)
-        B(:,(TensorOperations.size(A, 1)*(j-1)+1):(TensorOperations.size(A, 1)*j))=A(:,:,j)';
+    B=zeros(dim(2),dim(1)*dim(3));
+    for j=1:dim(3)
+        B(:,(dim(1)*(j-1)+1):(dim(1)*j))=squeeze(A(:,:,j))';
     end
 elseif mode==3
-    B=sparse(TensorOperations.size(A, 3),TensorOperations.size(A, 1)*TensorOperations.size(A, 2));
-    for j=1:TensorOperations.size(A, 1)
-        B(:,(TensorOperations.size(A, 2)*(j-1)+1):(TensorOperations.size(A, 2)*j))=A(j,:,:)';
+    B=zeros(dim(3),dim(1)*dim(2));
+    for j=1:dim(1)
+        B(:,(dim(2)*(j-1)+1):(dim(2)*j))=squeeze(A(j,:,:))';
     end
 end
     
