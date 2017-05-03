@@ -83,5 +83,26 @@ classdef TensorOperations < handle
              dim = TensorOperations.size(T, 0);
              A = TensorOperations.fold(M * TensorOperations.unfold(T,mode), dim(setdiff(1:length(dim), mode)), mode);
         end
+        
+        function[A] = subtract(T, S)
+            if TensorOperations.size(T, 0) ~= TensorOperations.size(S, 0)
+                error('Tensor dimensions don\t match');
+            end
+            A = SpTensor(TensorOperations.size(T, 1), TensorOperations.size(T, 2), TensorOperations.size(T, 3));
+            for slice = TensorOperations.size(T, 3)
+                sizeSliceT = size(T.mat{slice}, 2) / 3;
+                sizeSliceS = size(S.mat{slice}, 2) / 3;
+                for i = 1:sizeSliceT
+                    coordX = T.mat{slice}(3 * i - 2);
+                    coordY = T.mat{slice}(3 * i - 1);
+                    A = T(coordX, coordY) - S(coordX, coordY);
+                end
+                for i = 1:sizeSliceS
+                    coordX = S.mat{slice}(3 * i - 2);
+                    coordY = S.mat{slice}(3 * i - 1);
+                    A = T(coordX, coordY) - S(coordX, coordY);
+                end
+            end
+        end
     end
 end
