@@ -32,11 +32,12 @@ classdef PARAFAC
                     x = x / xNorm;
                     y = y / yNorm;
                     z = z / zNorm;
+                    counter = counter + 1;
                 end
                 u(:, k) = x;
                 v(:, k) = y;
                 w(:, k) = z;
-                sigma(k) = lamdbaNew;
+                sigma(k) = lambdaNew;
             end
         end
         
