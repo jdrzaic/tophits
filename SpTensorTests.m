@@ -19,7 +19,6 @@ end
 spres = TensorOperations.multi(spten, spmat, mode);
 normres = multi(normten, normmat, mode);
 
-mode = 3;
 
 for i = 1:m + 5
     for j = 1:m + 5

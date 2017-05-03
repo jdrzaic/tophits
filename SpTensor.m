@@ -44,13 +44,19 @@ classdef SpTensor < handle
         end
         
         function setElementsByIndexes(obj, rows, cols, ancs, values)
+            rowsAll = 0;
+            colsAll = 0;
+            ancsAll = 0;
             if rows == ':'
+                rowsAll = 1;
                 rows = 1:obj.k;
             end
             if cols == ':'
+                colsAll = 1;
                 cols = 1:obj.l;
             end
             if ancs == ':'
+                ancsAll = 1;
                 ancs = 1:obj.m;
             end
             % set matrix size (slices are covered separately)
@@ -84,9 +90,9 @@ classdef SpTensor < handle
                     sizeSlice = size(obj.mat{slice}, 2) / 3;
                     for row = rows
                         for col = cols
-                            if length(ancs) == 1
+                            if length(ancs) == 1 && ~ancsAll
                                 value = values(row - offsetRow, col - offsetCol);
-                            elseif length(cols) == 1
+                            elseif length(cols) == 1 && ~colsAll
                                 value = values(row - offsetRow, slice - offsetSlice);
                             else
                                 value = values(col - offsetCol, slice - offsetSlice);
