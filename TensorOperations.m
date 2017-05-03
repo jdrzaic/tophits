@@ -37,7 +37,6 @@ classdef TensorOperations < handle
                 n=dim(2)/dekomp(1);
                 A=SpTensor(l,m,n);
                 for j=1:m
-                    B(:,(n*(j-1)+1):(n*j))
                     A(:,j,:)=B(:,(n*(j-1)+1):(n*j));
                 end
             elseif mode==2
@@ -47,7 +46,6 @@ classdef TensorOperations < handle
                 A=SpTensor(l,m,n);
                 for k=1:n
                    A(:,:,k)=B(:,(l*(k-1)+1):(k*l))';
-
                 end
             elseif mode==3
                 l=dim(2)/dekomp(2);
@@ -82,6 +80,11 @@ classdef TensorOperations < handle
         function[A] = multi(T, M, mode)
              dim = TensorOperations.size(T, 0);
              A = TensorOperations.fold(M * TensorOperations.unfold(T,mode), dim(setdiff(1:length(dim), mode)), mode);
+        end
+        
+        function[A] = multiUnfolded(T, M, mode)
+             dim = TensorOperations.size(T, 0);
+             A = M * TensorOperations.unfold(T,mode), dim(setdiff(1:length(dim), mode));
         end
         
         function[A] = subtract(T, S)

@@ -97,7 +97,7 @@ classdef SpTensor < handle
                             else
                                 value = values(col - offsetCol, slice - offsetSlice);
                             end
-                            obj.setForRowAndCol(slice, sizeSlice, row, col, value);
+                            sizeSlice = obj.setForRowAndCol(slice, sizeSlice, row, col, value);
                         end
                     end
                 end
@@ -116,7 +116,7 @@ classdef SpTensor < handle
                         row = values.mat{slice - offsetAnc}(3 * i - 2);
                         col = values.mat{slice - offsetAnc}(3 * i - 1);
                         value = values.mat{slice - offsetAnc}(3 * i);
-                        obj.setForRowAndCol(slice, sizeSlice, row + offsetRow, col + offsetCol, value);
+                        sizeSlice = obj.setForRowAndCol(slice, sizeSlice, row + offsetRow, col + offsetCol, value);
                     end
                 end
             end
