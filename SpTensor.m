@@ -135,7 +135,7 @@ classdef SpTensor < handle
         end 
        
         function sizeSlice = setForRowAndCol(obj, slice, sizeSlice, row, col, value)
-            if abs(value) < 10e-10
+            if abs(value) < 10e-13
                 return
             end
             foundCoordinate = 0;
