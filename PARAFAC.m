@@ -10,6 +10,7 @@ classdef PARAFAC
             lambdaNew = 0;
             lambdaOld = 0;
             for k = 1:p
+                k
                 x = sparse(1:n, ones(n, 1), ones(n, 1), n, 1);
                 y = sparse(1:n, ones(n, 1), ones(n, 1), n, 1);
                 z = sparse(1:m, ones(m, 1), ones(m, 1), m, 1);
@@ -25,9 +26,9 @@ classdef PARAFAC
                     baseZ = baseZ(1, 1, :)';
                     z = baseZ - PARAFAC.subtractSum(sigma, w, u, v, x, y, k - 1);
                     lambdaOld = lambdaNew;
-                    xNorm = norm(x);
-                    yNorm = norm(y);
-                    zNorm = norm(z);
+                    xNorm = norm(x, 'fro')
+                    yNorm = norm(y, 'fro');
+                    zNorm = norm(z, 'fro');
                     lambdaNew = xNorm * yNorm * zNorm;
                     x = x / xNorm;
                     y = y / yNorm;
@@ -51,6 +52,15 @@ classdef PARAFAC
                     subsum = subsum + stepsubsum;
                 end
             end
+        end
+        
+        function a = calculateByQuery(q, v, w)
+            p = size(v, 2);
+            a = 0;
+            for i = 1:p
+                a = a + (q' * w(:,i)) * v(:,i);
+            end
+            
         end
     end
 end
