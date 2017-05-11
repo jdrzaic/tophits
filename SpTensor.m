@@ -47,15 +47,15 @@ classdef SpTensor < handle
             rowsAll = 0;
             colsAll = 0;
             ancsAll = 0;
-            if rows == ':'
+            if rows == ':' && ischar(rows)
                 rowsAll = 1;
                 rows = 1:obj.k;
             end
-            if cols == ':'
+            if cols == ':' && ischar(cols)
                 colsAll = 1;
                 cols = 1:obj.l;
             end
-            if ancs == ':'
+            if ancs == ':' && ischar(ancs)
                 ancsAll = 1;
                 ancs = 1:obj.m;
             end
@@ -179,13 +179,13 @@ classdef SpTensor < handle
         end
         
         function indexelements = getElementsByIndexes(obj, rows, cols, ancs)
-            if rows == ':'
+            if rows == ':' && ischar(rows)
                 rows = 1:obj.k;
             end
-            if cols == ':'
+            if cols == ':' && ischar(cols)
                 cols = 1:obj.l;
             end
-            if ancs == ':'
+            if ancs == ':' && ischar(ancs)
                 ancs = 1:obj.m;
             end
             if rows(length(rows)) > obj.k || cols(length(cols)) > obj.l || ancs(length(ancs)) > obj.m

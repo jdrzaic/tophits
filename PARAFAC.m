@@ -10,12 +10,13 @@ classdef PARAFAC
             lambdaNew = 0;
             lambdaOld = 0;
             for k = 1:p
-                k
                 x = sparse(1:n, ones(n, 1), ones(n, 1), n, 1);
                 y = sparse(1:n, ones(n, 1), ones(n, 1), n, 1);
                 z = sparse(1:m, ones(m, 1), ones(m, 1), m, 1);
                 counter = 1;
-                while counter < 3 || abs(lambdaOld - lambdaNew) >= epsilon
+                k
+                while counter < 3 || abs(lambdaOld - lambdaNew) >= epsilon && counter < 20
+                    abs(lambdaOld - lambdaNew)
                     baseX = TensorOperations.multi(TensorOperations.multi(A, y', 2), z', 3); % multiply tensor x matrix
                     baseX = baseX(:, 1, 1); % squeze baseX by dimension 2 and 3
                     x = baseX - PARAFAC.subtractSum(sigma, u, v, w, y, z, k - 1);
@@ -26,10 +27,11 @@ classdef PARAFAC
                     baseZ = baseZ(1, 1, :)';
                     z = baseZ - PARAFAC.subtractSum(sigma, w, u, v, x, y, k - 1);
                     lambdaOld = lambdaNew;
-                    xNorm = norm(x, 'fro')
-                    yNorm = norm(y, 'fro');
-                    zNorm = norm(z, 'fro');
+                    xNorm = norm(x);
+                    yNorm = norm(y);
+                    zNorm = norm(z);
                     lambdaNew = xNorm * yNorm * zNorm;
+                    
                     x = x / xNorm;
                     y = y / yNorm;
                     z = z / zNorm;
@@ -55,9 +57,9 @@ classdef PARAFAC
         end
         
         function a = calculateByQuery(q, v, w)
-            p = size(v, 2);
+            s = size(v, 2);
             a = 0;
-            for i = 1:p
+            for i = 1:s
                 a = a + (q' * w(:,i)) * v(:,i);
             end
             
